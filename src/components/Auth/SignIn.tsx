@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import supabase from '@/configs/supabase';
 import { useNavigate } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 const SignIn: React.FC = () => {
   const [userData, setUserData] = useState({
@@ -13,11 +13,13 @@ const SignIn: React.FC = () => {
     password: '',
   });
   const [msg, setMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: userData.email,
@@ -25,6 +27,7 @@ const SignIn: React.FC = () => {
     });
 
     if (error) {
+      setIsLoading(false);
       setMsg(error.message);
       setUserData((prev) => ({
         ...prev,
@@ -34,6 +37,7 @@ const SignIn: React.FC = () => {
     }
 
     if (data) {
+      setIsLoading(false);
       navigate('/');
     }
   };
@@ -48,6 +52,8 @@ const SignIn: React.FC = () => {
   };
 
   const isDisable = Boolean(userData.email.length && userData.password.length);
+
+  console.log(isDisable, isLoading)
 
   return (
     <form className='flex flex-col gap-5' onSubmit={handleSubmit}>
@@ -72,7 +78,8 @@ const SignIn: React.FC = () => {
           autoComplete='password'
         />
       </div>
-      <Button disabled={!isDisable} type='submit'>
+      <Button disabled={!isDisable  || isLoading} type='submit'>
+        {isLoading && <Loader2 className='animate-spin' />}
         Войти
       </Button>
       {msg && (

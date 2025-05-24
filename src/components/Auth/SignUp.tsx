@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import supabase from '@/configs/supabase';
+import { Loader2 } from 'lucide-react';
 
 const SignUp: React.FC = () => {
   const [userData, setUserData] = useState({
@@ -11,10 +12,12 @@ const SignUp: React.FC = () => {
     confirmPassword: '',
   });
   const [msg, setMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMsg('');
+    setIsLoading(true);
 
     const { data, error } = await supabase.auth.signUp({
       email: userData.email,
@@ -22,9 +25,11 @@ const SignUp: React.FC = () => {
     });
     if (error) {
       setMsg(error.message);
+      setIsLoading(false);
       return;
     }
     if (data) {
+      setIsLoading(false);
       setMsg('Успешно');
       setUserData({
         email: '',
@@ -86,7 +91,8 @@ const SignUp: React.FC = () => {
         />
       </div>
       {msg && <p>{msg}</p>}
-      <Button disabled={!handleDisable()} type='submit'>
+      <Button disabled={!handleDisable() || isLoading} type='submit'>
+        {isLoading && <Loader2 className='animate-spin' />}
         Войти
       </Button>
     </form>
